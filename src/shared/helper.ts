@@ -12,3 +12,17 @@ export const snakeToKabab = (str: string) =>  str.replace(
   /([-_][a-z])/g,
   group => group.replace('_', '-')
 )
+
+export const matchLineNumber = (matchedString: any) => {
+  if (!matchedString) {
+    return -1
+  }
+  let line = 1
+  console.log('matchedString', matchedString);
+  for (let i = 0; i < matchedString.index; i++) {
+    if (matchedString.input[i] === '\n') {
+      line++
+    }
+  }
+  return line
+}

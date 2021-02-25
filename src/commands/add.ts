@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 import {service, controller, model, respository} from '../shared/generators'
-import {snakeToKabab, formatClassName, snakeToCamel} from '../shared/helper'
+import {snakeToKabab, formatClassName, snakeToCamel, matchLineNumber} from '../shared/helper'
 
 export default class Add extends Command {
   static description = 'add new note'
@@ -27,6 +27,7 @@ export default class Add extends Command {
 
     let readFile: any
     let contentAfterReplacement: any
+    let matchedLineNumber: any
 
     switch (type) {
     case 'service':
@@ -62,10 +63,16 @@ export default class Add extends Command {
     case 'repository':
       writeFileSync(`src/repositories/${name}.repository${fileExtension}`, respository(name))
       readFile = readFileSync('src/repositories/index.ts', 'utf8')
+      console.log(matchLineNumber(/models/.exec(readFile)))
+      matchedLineNumber = matchLineNumber(/models/.exec(readFile))
+      // console.log('readFile.toString()', readFile.toString())
+      // readFile = readFile.toString().split().splice(matchedLineNumber, 0, `\n\t${name}`)
+      // console.log('readFile', readFile)
+      // contentAfterReplacement = readFile.join('\n')
       contentAfterReplacement = readFile
-      .replace(' // # import_model', `,\n\t${name} // # import_model`)
-      .replace(' // # import_repository', `\nimport { ${formatClassName(snakeToCamel(name, ''))}Repository } from './${name}.repository'; // # import_repository`)
-      .replace(' // # export_repository', `\nexport const ${snakeToCamel(name, '')}Repository: ${formatClassName(snakeToCamel(name, ''))}Repository = new ${formatClassName(snakeToCamel(name, ''))}Repository(${name}); // # export_single`)
+      .replace(/models/, `,\n\t${name} // # import_model \n `)
+      // .replace(' // # import_repository', `\nimport { ${formatClassName(snakeToCamel(name, ''))}Repository } from './${name}.repository'; // # import_repository`)
+      // .replace(' // # export_repository', `\nexport const ${snakeToCamel(name, '')}Repository: ${formatClassName(snakeToCamel(name, ''))}Repository = new ${formatClassName(snakeToCamel(name, ''))}Repository(${name}); // # export_single`)
       writeFileSync('src/repositories/index.ts', contentAfterReplacement, 'utf8')
       this.log(`Created "${noteName}" ${type}`)
       break
